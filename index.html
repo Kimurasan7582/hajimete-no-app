@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>タスク管理アプリ</title>
+
+  <style>
+    :root {
+      --背景: #f4f7fb;
+      --カード: #ffffff;
+      --文字: #1f2937;
+      --薄い文字: #6b7280;
+      --線: #e5e7eb;
+      --青: #2563eb;
+      --赤: #ef4444;
+      --緑: #16a34a;
+    }
+
+    body.ダーク {
+      --背景: #111827;
+      --カード: #1f2937;
+      --文字: #f9fafb;
+      --薄い文字: #cbd5e1;
+      --線: #374151;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--背景);
+      color: var(--文字);
+      font-family: sans-serif;
+      transition: 0.2s;
+    }
+
+    header {
+      background: var(--カード);
+      border-bottom: 1px solid var(--線);
+      padding: 18px;
+    }
+
+    .ヘッダー中身 {
+      max-width: 900px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 25px 15px;
+    }
+
+    .カード {
+      background: var(--カード);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px #0000000d;
+    }
+
+    .入力グループ {
+      display: grid;
+      grid-template-columns: 1fr 150px 160px auto;
+      gap: 10px;
+    }
+
+    input, select, button {
+      font: inherit;
+      border-radius: 10px;
+    }
+
+    input, select {
+      padding: 12px;
+      border: 1px solid var(--線);
+      background: var(--カード);
+      color: var(--文字);
+    }
+
+    button {
+      border: none;
+      padding: 11px 15px;
+      cursor: pointer;
+      color: white;
+      background: var(--青);
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .ボタン小 {
+      padding: 7px 10px;
+      font-size: 14px;
+    }
+
+    .赤 {
+      background: var(--赤);
+    }
+
+    .白 {
+      background: var(--線);
+      color: var(--文字);
+    }
+
+    .数字エリア {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .数字 {
+      text-align: center;
+      border: 1px solid var(--線);
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .数字 strong {
+      display: block;
+      font-size: 28px;
+      color: var(--青);
+    }
+
+    .操作エリア {
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 5px;
+      border-bottom: 1px solid var(--線);
+    }
+
+    li:last-child {
+      border-bottom: none;
+    }
+
+    .タスク本文 {
+      flex: 1;
+    }
+
+    .完了 .タスク名 {
+      text-decoration: line-through;
+      color: var(--薄い文字);
+    }
+
+    .情報 {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--薄い文字);
+    }
+
+    .タグ {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-radius: 99px;
+      padding: 3px 8px;
+    }
+
+    body.ダーク .タグ {
+      background: #1e3a8a;
+      color: #dbeafe;
+    }
+
+    .締切近い {
+      color: var(--赤);
+      font-weight: bold;
+    }
+
+    #空 {
+      text-align: center;
+      color: var(--薄い文字);
+      padding: 35px;
+    }
+
+    @media (max-width: 650px) {
+      .入力グループ,
+      .操作エリア {
+        grid-template-columns: 1fr;
+      }
+
+      .数字エリア {
+        gap: 8px;
+      }
+
+      li {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="ヘッダー中身">
+      <h1>✅ タスク管理アプリ</h1>
+      <button class="白" onclick="ダークモード切替()">🌙 表示を変える</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="カード">
+      <h2>新しいタスク</h2>
+
+      <div class="入力グループ">
+        <input id="内容" placeholder="例：数学の宿題をする">
+        <select id="カテゴリ">
+          <option>学校</option>
+          <option>仕事</option>
+          <option>家</option>
+          <option>買い物</option>
+          <option>その他</option>
+        </select>
+        <input id="締切" type="date">
+        <button onclick="追加する()">追加</button>
+      </div>
+    </section>
+
+    <section class="カード">
+      <div class="数字エリア">
+        <div class="数字">すべて<strong id="全数">0</strong></div>
+        <div class="数字">未完了<strong id="未完了数">0</strong></div>
+        <div class="数字">完了率<strong id="完了率">0%</strong></div>
+      </div>
+    </section>
+
+    <section class="カード">
+      <div class="操作エリア">
+        <input id="検索" placeholder="タスクを検索" oninput="表示する()">
+
+        <select id="表示方法" onchange="表示する()">
+          <option value="すべて">すべて表示</option>
+          <option value="未完了">未完了だけ</option>
+          <option value="完了">完了だけ</option>
+        </select>
+      </div>
+
+      <ul id="一覧"></ul>
+      <p id="空">タスクはまだないで。上から追加してみて。</p>
+    </section>
+  </main>
+
+  <script>
+    let タスク一覧 = JSON.parse(localStorage.getItem("タスク一覧")) || [];
+
+    if (localStorage.getItem("ダークモード") === "はい") {
+      document.body.classList.add("ダーク");
+    }
+
+    function 保存する() {
+      localStorage.setItem("タスク一覧", JSON.stringify(タスク一覧));
+    }
+
+    function 文字を安全にする(文字) {
+      return 文字
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function 追加する() {
+      const 内容 = document.getElementById("内容").value.trim();
+      const カテゴリ = document.getElementById("カテゴリ").value;
+      const 締切 = document.getElementById("締切").value;
+
+      if (内容 === "") {
+        alert("タスクの内容を書いてな。");
+        return;
+      }
+
+      タスク一覧.unshift({
+        id: Date.now(),
+        内容: 内容,
+        カテゴリ: カテゴリ,
+        締切: 締切,
+        完了: false
+      });
+
+      保存する();
+      表示する();
+
+      document.getElementById("内容").value = "";
+      document.getElementById("締切").value = "";
+      document.getElementById("内容").focus();
+    }
+
+    function 完了を切替える(id) {
+      const タスク = タスク一覧.find(function(項目) {
+        return 項目.id === id;
+      });
+
+      タスク.完了 = !タスク.完了;
+      保存する();
+      表示する();
+    }
+
+    function 削除する(id) {
+      const 削除していい = confirm("このタスクを削除する？");
+
+      if (!削除していい) {
+        return;
+      }
+
+      タスク一覧 = タスク一覧.filter(function(項目) {
+        return 項目.id !== id;
+      });
+
+      保存する();
+      表示する();
+    }
+
+    function 編集する(id) {
+      const タスク = タスク一覧.find(function(項目) {
+        return 項目.id === id;
+      });
+
+      const 新しい内容 = prompt("新しい内容を書いてな。", タスク.内容);
+
+      if (新しい内容 && 新しい内容.trim() !== "") {
+        タスク.内容 = 新しい内容.trim();
+        保存する();
+        表示する();
+      }
+    }
+
+    function 締切の表示(締切) {
+      if (締切 === "") {
+        return "";
+      }
+
+      const 今日 = new Date().toISOString().slice(0, 10);
+      const クラス = 締切 < 今日 ? "締切近い" : "";
+
+      return `<span class="${クラス}">📅 ${締切}</span>`;
+    }
+
+    function 表示する() {
+      const 一覧 = document.getElementById("一覧");
+      const 空 = document.getElementById("空");
+      const 検索文字 = document.getElementById("検索").value.toLowerCase();
+      const 表示方法 = document.getElementById("表示方法").value;
+
+      const 表示するタスク = タスク一覧.filter(function(タスク) {
+        const 検索に合う = タスク.内容.toLowerCase().includes(検索文字);
+        const 状態に合う =
+          表示方法 === "すべて" ||
+          (表示方法 === "未完了" && !タスク.完了) ||
+          (表示方法 === "完了" && タスク.完了);
+
+        return 検索に合う && 状態に合う;
+      });
+
+      一覧.innerHTML = "";
+      空.style.display = 表示するタスク.length === 0 ? "block" : "none";
+
+      表示するタスク.forEach(function(タスク) {
+        const 行 = document.createElement("li");
+
+        if (タスク.完了) {
+          行.classList.add("完了");
+        }
+
+        行.innerHTML = `
+          <input
+            type="checkbox"
+            ${タスク.完了 ? "checked" : ""}
+            onchange="完了を切替える(${タスク.id})"
+          >
+
+          <div class="タスク本文">
+            <div class="タスク名">${文字を安全にする(タスク.内容)}</div>
+            <div class="情報">
+              <span class="タグ">${タスク.カテゴリ}</span>
+              ${締切の表示(タスク.締切)}
+            </div>
+          </div>
+
+          <button class="ボタン小 白" onclick="編集する(${タスク.id})">編集</button>
+          <button class="ボタン小 赤" onclick="削除する(${タスク.id})">削除</button>
+        `;
+
+        一覧.appendChild(行);
+      });
+
+      const 全数 = タスク一覧.length;
+      const 完了数 = タスク一覧.filter(function(タスク) {
+        return タスク.完了;
+      }).length;
+
+      document.getElementById("全数").textContent = 全数;
+      document.getElementById("未完了数").textContent = 全数 - 完了数;
+      document.getElementById("完了率").textContent =
+        全数 === 0 ? "0%" : Math.round((完了数 / 全数) * 100) + "%";
+    }
+
+    function ダークモード切替() {
+      document.body.classList.toggle("ダーク");
+
+      const ダークかどうか = document.body.classList.contains("ダーク");
+      localStorage.setItem("ダークモード", ダークかどうか ? "はい" : "いいえ");
+    }
+
+    document.getElementById("内容").addEventListener("keydown", function(キー) {
+      if (キー.key === "Enter") {
+        追加する();
+      }
+    });
+
+    表示する();
+  </script>
+</body>
+</html>
